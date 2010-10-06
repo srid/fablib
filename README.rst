@@ -24,10 +24,13 @@ fablib
 
     $ fab -l
     $ fab clean
-    $ fab init
+    $ fab init    # `fab init:pyver=3.1` for Py3k!
 
 3. No more buildout! ::
 
     $ bin/python
 
+See the `applib`__ project for a real-world example.
+
+.. __: http://github.com/ActiveState/applib/blob/master/fabfile.py#L1
 
