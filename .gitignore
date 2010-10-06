@@ -1,0 +1,7 @@
+*.pyc
+bin
+lib
+include
+Lib
+Scripts
+tmp

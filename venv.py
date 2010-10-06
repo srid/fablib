@@ -1,5 +1,12 @@
 """Virtualenv utilities for fabric"""
 
+import os
+from os import path
+import shutil
+
+from fabric.api import *
+
+
 def clean():
     """Delete all files/directories ignored in source control
     
