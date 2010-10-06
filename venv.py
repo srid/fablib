@@ -22,8 +22,7 @@ def clean():
     from scratch.
     """
     # TODO: support git and hg
-    root = path.dirname(__file__)
-    ignores = local('svn propget svn:ignore {root}'.format(
+    ignores = local('svn propget svn:ignore .'.format(
         root=root)).splitlines()
     for ignore in ignores:
         ignore = ignore.strip()
