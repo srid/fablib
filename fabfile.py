@@ -4,3 +4,4 @@ import venv
 
 
 clean = venv.clean
+init = venv.init

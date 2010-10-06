@@ -2,9 +2,13 @@
 
 import os
 from os import path
+import sys
 import shutil
+import time
 
 from fabric.api import *
+
+WIN = sys.platform == 'win32'
 
 
 def clean():
@@ -42,6 +46,9 @@ def init(pyver='2.7', upgrade=False, apy=False):
       pyver             -- The Python version to use (eg: 2.7)
       upgrade           -- Should we upgrade installed packages?
       apy               -- Must use ActivePython
+      
+    TODO: fail with instructive error message when virtualenv/virtualenv5 is
+          not installed (use which.py?)
       
     TODO: support installing [extra] requirements as 'setup.py develop' will
           not install them.
