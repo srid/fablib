@@ -21,9 +21,11 @@ def clean():
     The idea is to eventually to delete virtualenv-created files to start
     from scratch.
     """
+    from glob import glob
+    
     # TODO: support git and hg
-    ignores = local('svn propget svn:ignore .'.format(
-        root=root)).splitlines()
+    root = path.abspath('.')
+    ignores = local('svn propget svn:ignore {0}'.format(root)).splitlines()
     for ignore in ignores:
         ignore = ignore.strip()
         if not ignore: continue
@@ -92,6 +94,10 @@ def init(pyver='2.7', upgrade=False, apy=False):
 
     # setup dev environment
     local('{0} setup.py develop'.format(python_exe))
+    
+    return dict(
+        virtualenv=virtualenv,
+        install=install)
 
 
 def _get_python(pyver):
