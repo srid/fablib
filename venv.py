@@ -23,9 +23,24 @@ def clean():
     """
     from glob import glob
     
-    # TODO: support git and hg
     root = path.abspath('.')
-    ignores = local('svn propget svn:ignore {0}'.format(root)).splitlines()
+    
+    # Read ignore patterns
+    if path.exists(path.join(root, '.svn')):
+        ignores = local('svn propget svn:ignore {0}'.format(root)).splitlines()
+    elif path.exists(path.join(root, '.git')):
+        gitignore = path.join(root, '.gitignore')
+        if path.exists(gitignore):
+            ignores = open(gitignore).readlines()
+        else:
+            ignores = []
+    else:
+        raise IOError('unsupported source control at %s' % root)
+        
+    # Strip ignore patterns of empty lines and comments
+    ignores = [ign.strip() for ign in ignores \
+               if ign.strip() and not ign.strip().startswith('#')]
+    
     for ignore in ignores:
         ignore = ignore.strip()
         if not ignore: continue
