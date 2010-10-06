@@ -68,8 +68,10 @@ def init(pyver='2.7', upgrade=False, apy=False):
       
     TODO: support installing [extra] requirements as 'setup.py develop' will
           not install them.
+          
+    Return the virtualenv binary path that was used to create the virtualenv
     """
-    py = _get_python(pyver)
+    py = get_system_python(pyver)
     virtualenv = 'virtualenv5' if pyver[0] == '3' else 'virtualenv'
 
     # must be ActivePython
@@ -81,21 +83,9 @@ def init(pyver='2.7', upgrade=False, apy=False):
     local(venv_cmd, capture=False)
 
     # find paths to essential binaries in the created virtualenv
-    scripts_dir = 'Scripts' if WIN else 'bin'
-    python_exe = path.join(scripts_dir, 'python.exe' if WIN else 'python')
-    ez_exe = path.join(scripts_dir, 'easy_install.exe' if WIN else \
-                       'easy_install')
-    pip_exe = path.join(scripts_dir, 'pip.exe' if WIN else 'pip')
-
-    def install(pkg, force_upgrade=False):
-        if path.exists(pip_exe):
-            install_cmd = '{0} install {1} {{0}}'.format(
-                pip_exe, '-U' if upgrade or force_upgrade else '')
-        else:
-            # pip exe doesn't exist (python3?); fallback to easy_install
-            install_cmd = '{0} {1} {{0}}'.format(
-                ez_exe, '-U' if upgrade or force_upgrade else '')
-        local(install_cmd.format(pkg))
+    python_exe = get_script('python')
+    ez_exe = get_script('easy_install')
+    pip_exe = get_script('pip')
         
     if WIN:
         # Stupid virtualenv exits immediately to console on Windows, leaving
@@ -110,12 +100,39 @@ def init(pyver='2.7', upgrade=False, apy=False):
     # setup dev environment
     local('{0} setup.py develop'.format(python_exe))
     
-    return dict(
-        virtualenv=virtualenv,
-        install=install)
+    return virtualenv
+    
+    
+def get_script(name):
+    """Return the path to the given script in virtualenv"""
+    scripts_dir = 'Scripts' if WIN else 'bin'
+    return path.join(scripts_dir, name + '.exe' if WIN else name)
+    
+    
+def install(pkg, force_upgrade=False):
+    """Install the given package into virtualenv
+    
+    force_upgrade      -- pass -U option to pip/easy_install
+    """
+    pip_exe = get_script('pip')
+    if path.exists(pip_exe):
+        install_cmd = '{0} install {1} {{0}}'.format(
+            pip_exe, '-U' if force_upgrade else '')
+    else:
+        # pip exe doesn't exist (python3?); fallback to easy_install
+        ez_exe = get_script('easy_install')
+        install_cmd = '{0} {1} {{0}}'.format(
+            ez_exe, '-U' if force_upgrade else '')
+    local(install_cmd.format(pkg))
 
 
-def _get_python(pyver):
+def get_system_python(pyver):
+    """Return the command to run system Python
+    
+    On Mac, this returns the full path to /Lib../Frm... Python (not /System)
+    On Windows, this returns pythonXY.exe (ActivePython)
+    On Linux, this simply returns pythonX.Y
+    """
     if sys.platform == 'win32':
         # TODO: support non-ActivePython as well
         # TODO: change to pythonX.Y once newer versions of APy is released
