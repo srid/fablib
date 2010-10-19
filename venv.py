@@ -90,8 +90,12 @@ def init(pyver='2.7', upgrade=False, apy=False):
     if WIN:
         # Stupid virtualenv exits immediately to console on Windows, leaving
         # it running as a background process.
-        print('Waiting for virtualenv to finish (10 secs) ...')
-        time.sleep(10)
+        print('*** Waiting for the detached process (virtualenv) to finish (50s)')
+        print('*** Press Ctrl+C to forcibly continue')
+        try:
+            time.sleep(50)
+        except KeyboardInterrupt:
+            pass
         
     # upgrade to latest distribute; virtualenv must have installed an outdated
     # version.
@@ -119,10 +123,14 @@ def install(pkg, force_upgrade=False):
         install_cmd = '{0} install {1} {{0}}'.format(
             pip_exe, '-U' if force_upgrade else '')
     else:
-        # pip exe doesn't exist (python3?); fallback to easy_install
-        ez_exe = get_script('easy_install')
-        install_cmd = '{0} {1} {{0}}'.format(
-            ez_exe, '-U' if force_upgrade else '')
+        # pip exe doesn't exist (python3?); fallback to easy_install.
+        
+        # Run easy_install via `python -m` to prevent easy_install.exe from
+        # opening new command prompts (silly)
+        # ez_exe = get_script('easy_install')
+        py_exe = get_script('python')
+        install_cmd = '{0} -m easy_install {1} {{0}}'.format(
+            py_exe, '-U' if force_upgrade else '')
     local(install_cmd.format(pkg))
 
 
