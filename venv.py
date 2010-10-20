@@ -53,7 +53,7 @@ def clean():
                 os.remove(pth)
 
 
-def init(pyver='2.7', upgrade=False, apy=False):
+def init(pyver='2.7', upgrade=False, dir='.', apy=False):
     """Create a virtualenv and setup entry points
     
     Poor man's buildout (supports py3k too!). You will need to have virtualenv
@@ -61,6 +61,7 @@ def init(pyver='2.7', upgrade=False, apy=False):
     
       pyver             -- The Python version to use (eg: 2.7)
       upgrade           -- Should we upgrade installed packages?
+      dir               -- Where to create the virtualenv (default: current dir)
       apy               -- Must use ActivePython
       
     TODO: fail with instructive error message when virtualenv/virtualenv5 is
@@ -79,13 +80,13 @@ def init(pyver='2.7', upgrade=False, apy=False):
         local('{0} -m activestate'.format(py))
 
     # create virtualenv
-    venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, '.')
+    venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
     local(venv_cmd, capture=False)
 
     # find paths to essential binaries in the created virtualenv
-    python_exe = get_script('python')
-    ez_exe = get_script('easy_install')
-    pip_exe = get_script('pip')
+    python_exe = get_script('python', dir)
+    ez_exe = get_script('easy_install', dir)
+    pip_exe = get_script('pip', dir)
         
     if WIN:
         # Stupid virtualenv exits immediately to console on Windows, leaving
@@ -107,18 +108,18 @@ def init(pyver='2.7', upgrade=False, apy=False):
     return virtualenv
     
     
-def get_script(name):
+def get_script(name, dir='.'):
     """Return the path to the given script in virtualenv"""
     scripts_dir = 'Scripts' if WIN else 'bin'
-    return path.join(scripts_dir, name + '.exe' if WIN else name)
+    return path.join(dir, scripts_dir, name + '.exe' if WIN else name)
     
     
-def install(pkg, force_upgrade=False):
+def install(pkg, dir='.', force_upgrade=False):
     """Install the given package into virtualenv
     
     force_upgrade      -- pass -U option to pip/easy_install
     """
-    pip_exe = get_script('pip')
+    pip_exe = get_script('pip', dir)
     if path.exists(pip_exe):
         install_cmd = '{0} install {1} {{0}}'.format(
             pip_exe, '-U' if force_upgrade else '')
@@ -127,8 +128,8 @@ def install(pkg, force_upgrade=False):
         
         # Run easy_install via `python -m` to prevent easy_install.exe from
         # opening new command prompts (silly)
-        # ez_exe = get_script('easy_install')
-        py_exe = get_script('python')
+        # ez_exe = get_script('easy_install', dir)
+        py_exe = get_script('python', dir)
         install_cmd = '{0} -m easy_install {1} {{0}}'.format(
             py_exe, '-U' if force_upgrade else '')
     local(install_cmd.format(pkg))
