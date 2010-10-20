@@ -100,7 +100,7 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
         
     # upgrade to latest distribute; virtualenv must have installed an outdated
     # version.
-    install('distribute', force_upgrade=True)
+    install('distribute', dir=dir, force_upgrade=True)
 
     # setup dev environment
     local('{0} setup.py develop'.format(python_exe))
