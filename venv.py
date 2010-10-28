@@ -5,6 +5,7 @@ from os import path
 import sys
 import shutil
 import time
+import subprocess
 
 from fabric.api import *
 
@@ -118,22 +119,54 @@ def install(pkg, dir='.', force_upgrade=False):
     """Install the given package into virtualenv
     
     force_upgrade      -- pass -U option to pip/easy_install
+    
+    Installers are detected in this order:
+        PyPM           (on PATH)
+        pip            (on scripts/)
+        easy_install   (on scripts/)
     """
+    pypm_exe = get_pypm_script()
     pip_exe = get_script('pip', dir)
-    if path.exists(pip_exe):
-        install_cmd = '{0} install {1} {{0}}'.format(
-            pip_exe, '-U' if force_upgrade else '')
+    if pypm_exe is not None:
+        install_cmd = _pypm_install_cmd(pypm_exe, dir, pkg)
+    elif path.exists(pip_exe):
+        install_cmd = _pip_install_cmd(pip_exe, pkg, force_upgrade)
     else:
         # pip exe doesn't exist (python3?); fallback to easy_install.
-        
-        # Run easy_install via `python -m` to prevent easy_install.exe from
-        # opening new command prompts (silly)
-        # ez_exe = get_script('easy_install', dir)
         py_exe = get_script('python', dir)
-        install_cmd = '{0} -m easy_install {1} {{0}}'.format(
-            py_exe, '-U' if force_upgrade else '')
-    local(install_cmd.format(pkg))
+        install_cmd = _ez_install_cmd(py_exe, pkg, force_upgrade)
+    local(install_cmd)
+    
 
+def _pypm_install_cmd(pypm, dir, pkg):
+    return '{0} -E {1} install {2}'.format(pypm, dir, pkg)
+    
+
+def _pip_install_cmd(pip_exe, pkg, force_upgrade):
+    return '{0} install {1} {2}'.format(
+        pip_exe, '-U' if force_upgrade else ''), pkg
+    
+    
+def _ez_install_cmd(py_exe, pkg, force_upgrade):
+    # Run easy_install via `python -m` to prevent easy_install.exe from
+    # opening new command prompts (silly)
+    # ez_exe = get_script('easy_install', dir)
+    return '{0} -m easy_install {1} {2}'.format(
+        py_exe, '-U' if force_upgrade else '', pkg)
+
+
+_pypm = ''
+def get_pypm_script():
+    """Return the command to run PyPM"""
+    global _pypm
+    if _pypm == '':
+        try:
+            subprocess.check_call(['pypm', 'info'], stdout=subprocess.PIPE)
+            _pypm = 'pypm'
+        except subprocess.CalledProcessError:
+            _pypm = None
+        
+    return _pypm
 
 def get_system_python(pyver):
     """Return the command to run system Python
