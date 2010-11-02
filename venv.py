@@ -6,6 +6,7 @@ import sys
 import shutil
 import time
 import subprocess
+from contextlib import contextmanager
 
 from fabric.api import *
 
@@ -81,8 +82,9 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
         local('{0} -m activestate'.format(py))
 
     # create virtualenv
-    venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
-    local(venv_cmd, capture=False)
+    with _workaround_virtualenv_bugs(py):
+        venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
+        local(venv_cmd, capture=False)
 
     # find paths to essential binaries in the created virtualenv
     python_exe = get_script('python', dir)
@@ -168,6 +170,7 @@ def get_pypm_script():
         
     return _pypm
 
+
 def get_system_python(pyver):
     """Return the command to run system Python
     
@@ -186,3 +189,27 @@ def get_system_python(pyver):
         python = 'python' + pyver
 
     return python
+
+
+@contextmanager
+def _workaround_virtualenv_bugs(py):
+    # move user readline.so out of the way
+    # http://bitbucket.org/ianb/virtualenv/issue/64
+    try:
+        readline_path = subprocess.check_output(
+            [py, '-c', 'import readline; print(readline.__file__)'],
+            stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError:
+        replace = False
+    else:
+        replace = readline_path.startswith(path.expanduser('~'))
+    
+    if replace:
+        print('Moving %s out of the way; virtualenv bug #64' % readline_path)
+        os.rename(readline_path, readline_path + '.oow')
+    try:
+        yield
+    finally:
+        if replace:
+            print('Moving %s back; virtualenv bug #64' % readline_path)
+            os.rename(readline_path + '.oow', readline_path)
