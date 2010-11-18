@@ -146,7 +146,7 @@ def _pypm_install_cmd(pypm, dir, pkg):
 
 def _pip_install_cmd(pip_exe, pkg, force_upgrade):
     return '{0} install {1} {2}'.format(
-        pip_exe, '-U' if force_upgrade else ''), pkg
+        pip_exe, '-U' if force_upgrade else '', pkg)
     
     
 def _ez_install_cmd(py_exe, pkg, force_upgrade):
