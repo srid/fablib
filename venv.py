@@ -2,6 +2,7 @@
 
 import os
 from os import path
+from glob import glob
 import sys
 import shutil
 import time
@@ -74,17 +75,7 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
           
     Return the virtualenv binary path that was used to create the virtualenv
     """
-    py = get_system_python(pyver)
-    virtualenv = 'virtualenv5' if pyver[0] == '3' else 'virtualenv'
-
-    # must be ActivePython
-    if apy:
-        local('{0} -m activestate'.format(py))
-
-    # create virtualenv
-    with _workaround_virtualenv_bugs(py):
-        venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
-        local(venv_cmd, capture=False)
+    create_virtualenv(pyver, dir, apy)
 
     # find paths to essential binaries in the created virtualenv
     python_exe = get_script('python', dir)
@@ -109,6 +100,20 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
     local('{0} setup.py develop'.format(python_exe))
     
     return virtualenv
+
+
+def create_virtualenv(pyver, dir, apy=False):
+    py = get_system_python(pyver)
+    virtualenv = 'virtualenv5' if pyver[0] == '3' else 'virtualenv'
+
+    # must be ActivePython
+    if apy:
+        local('{0} -m activestate'.format(py))
+
+    # create virtualenv
+    with _workaround_virtualenv_bugs(py):
+        venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
+        local(venv_cmd, capture=False)
     
     
 def get_script(name, dir='.'):
@@ -193,26 +198,34 @@ def get_system_python(pyver):
 
 @contextmanager
 def _workaround_virtualenv_bugs(py):
-    # move user readline.so out of the way
-    # http://bitbucket.org/ianb/virtualenv/issue/64
-    try:
-        readline_path = check_output(
-            [py, '-c', 'import readline; print(readline.__file__)'],
-            stderr=subprocess.PIPE).strip()
-    except subprocess.CalledProcessError:
-        replace = False
-    else:
-        replace = readline_path.startswith(path.expanduser('~'))
+    """Move user readline.so out of the way
+    ttp://bitbucket.org/ianb/virtualenv/issue/64
+    """
+    if sys.platform == 'win32':
+        yield
+        return
     
-    if replace:
-        print('Moving %s out of the way; virtualenv bug #64' % readline_path)
-        os.rename(readline_path, readline_path + '.oow')
+    readline_canditates = [
+        '~/.local/lib/python?.?/site-packages/readline.so',
+        '~/Library/Python/?.?/lib/python/site-packages/readline.so',
+    ]
+    readlines = []
+    for c in readline_canditates:
+        readlines.extend(glob(path.expanduser(c)))
+        
+    if readlines:
+        print('Moving the following out of the way; virtualenv bug #64')
+        print(readlines)
+        for rl in readlines:
+            os.rename(rl, rl + '.oow')
     try:
         yield
     finally:
-        if replace:
-            print('Moving %s back; virtualenv bug #64' % readline_path)
-            os.rename(readline_path + '.oow', readline_path)
+        if readlines:
+            print('Moving the following back; virtualenv bug #64')
+            print(readlines)
+            for rl in readlines:
+                os.rename(rl + '.oow', rl)
 
 
 
