@@ -75,7 +75,7 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
           
     Return the virtualenv binary path that was used to create the virtualenv
     """
-    create_virtualenv(pyver, dir, apy)
+    virtualenv = create_virtualenv(pyver, dir, apy)
 
     # find paths to essential binaries in the created virtualenv
     python_exe = get_script('python', dir)
@@ -114,6 +114,8 @@ def create_virtualenv(pyver, dir, apy=False):
     with _workaround_virtualenv_bugs(py):
         venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
         local(venv_cmd, capture=False)
+        
+    return virtualenv
     
     
 def get_script(name, dir='.'):
