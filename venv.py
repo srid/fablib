@@ -116,7 +116,7 @@ def create_virtualenv(pyver, dir, apy=False):
         local('{0} -m activestate'.format(py))
 
     # create virtualenv
-    with _workaround_virtualenv_bugs(py):
+    with _workaround_virtualenv_bugs(py, dir):
         venv_cmd = '{0} --no-site-packages {1} -p {2} {3}'.format(
             virtualenv, distribute_option, py, dir)
         local(venv_cmd, capture=False)
@@ -205,36 +205,57 @@ def get_system_python(pyver):
 
 
 @contextmanager
-def _workaround_virtualenv_bugs(py):
-    """Move user readline.so out of the way
-    ttp://bitbucket.org/ianb/virtualenv/issue/64
-    """
-    if sys.platform == 'win32':
-        yield
-        return
+def _workaround_virtualenv_bugs(py, dir):
+    """Patch the way the virtualenv works, specifically:
     
-    readline_canditates = [
-        '~/.local/lib/python?.?/site-packages/readline.so',
-        '~/Library/Python/?.?/lib/python/site-packages/readline.so',
-    ]
-    readlines = []
-    for c in readline_canditates:
-        readlines.extend(glob(path.expanduser(c)))
-        
-    if readlines:
-        print('Moving the following out of the way; virtualenv bug #64')
-        print(readlines)
-        for rl in readlines:
-            os.rename(rl, rl + '.oow')
-    try:
-        yield
-    finally:
+    a) Move user readline.so out of the way
+       http://bitbucket.org/ianb/virtualenv/issue/64
+       
+    b) Include PyWin32 in global site-packages
+    """
+    # a) Move readline.so out of the way
+    if sys.platform != 'win32':
+        readline_canditates = [
+            '~/.local/lib/python?.?/site-packages/readline.so',
+            '~/Library/Python/?.?/lib/python/site-packages/readline.so',
+        ]
+        readlines = []
+        for c in readline_canditates:
+            readlines.extend(glob(path.expanduser(c)))
+            
         if readlines:
-            print('Moving the following back; virtualenv bug #64')
+            print('Moving the following out of the way; virtualenv bug #64')
             print(readlines)
             for rl in readlines:
-                os.rename(rl + '.oow', rl)
-
+                os.rename(rl, rl + '.oow')
+        try:
+            yield
+        finally:
+            if readlines:
+                print('Moving the following back; virtualenv bug #64')
+                print(readlines)
+                for rl in readlines:
+                    os.rename(rl + '.oow', rl)
+    else:
+        # Include pywin32.pth with absolute filenames
+        yield
+        get_sp = "import distutils.sysconfig as sc; print(sc.get_python_lib())"
+        sp = check_output([py, '-c', get_sp]).strip()
+        pthfile = path.join(sp, 'pywin32.pth')
+        if path.exists(pthfile):
+            target = path.join(dir, 'Lib', 'site-packages', 'pywin32.pth')
+            print('Including global PyWin32 package: %s' % target)
+            shutil.copyfile(pthfile, target)
+            # Make the path absolute
+            new_pth = []
+            for line in open(target, 'r').readlines():
+                if line.strip() and not line.startswith('#'):
+                    new_pth.append(path.join(sp, line))
+                else:
+                    new_pth.append(line)
+            with open(target, 'w') as f:
+                f.writelines(new_pth)
+            print('Patched pywin32.pth')
 
 
 # check_output for python2.6
