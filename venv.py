@@ -104,7 +104,12 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
 
 def create_virtualenv(pyver, dir, apy=False):
     py = get_system_python(pyver)
-    virtualenv = 'virtualenv5' if pyver[0] == '3' else 'virtualenv'
+    if pyver[0] == '3':
+        virtualenv = 'virtualenv5'
+        distribute_option = ''  # not required
+    else:
+        virtualenv = 'virtualenv'
+        distribute_option = '--distribute'
 
     # must be ActivePython
     if apy:
@@ -112,7 +117,8 @@ def create_virtualenv(pyver, dir, apy=False):
 
     # create virtualenv
     with _workaround_virtualenv_bugs(py):
-        venv_cmd = '{0} --no-site-packages --distribute -p {1} {2}'.format(virtualenv, py, dir)
+        venv_cmd = '{0} --no-site-packages {1} -p {2} {3}'.format(
+            virtualenv, distribute_option, py, dir)
         local(venv_cmd, capture=False)
         
     return virtualenv
