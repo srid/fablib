@@ -112,7 +112,7 @@ def create_virtualenv(pyver, dir, apy=False):
 
     # create virtualenv
     with _workaround_virtualenv_bugs(py):
-        venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(virtualenv, py, dir)
+        venv_cmd = '{0} --no-site-packages --distribute -p {1} {2}'.format(virtualenv, py, dir)
         local(venv_cmd, capture=False)
         
     return virtualenv
