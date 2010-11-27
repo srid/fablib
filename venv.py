@@ -95,7 +95,10 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
     install('distribute', dir=dir, force_upgrade=True)
 
     # setup dev environment
-    local('{0} setup.py develop'.format(python_exe))
+    if path.exists('setup.py'):
+        local('{0} setup.py develop'.format(python_exe))
+    else:
+        print('No setup.py found; not installing dependencies')
     
     return virtualenv
 
