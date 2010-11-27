@@ -180,6 +180,11 @@ def get_pypm_script():
             _pypm = 'pypm'
         except subprocess.CalledProcessError:
             _pypm = None
+        except OSError as e:
+            if e.errno == 2:  # No such file or directory
+                _pypm = None
+            else:
+                raise
         
     return _pypm
 
