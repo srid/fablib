@@ -40,9 +40,14 @@ Features
 --------
 
 * Create virtualenv and install packages (including dependencies)
-* Automatically include PyWin32 from global site-packages
+* Automatically include `PyWin32
+  <http://docs.activestate.com/activepython/2.7/pywin32/PyWin32.HTML>`_ from
+  global site-packages
 * Use `PyPM <http://code.activestate.com/pypm>`_ (instead of pip) if available
-  -- saves a lot of time. Requires ActivePython.
+  -- saves a lot of time. Requires `ActivePython
+  <http://www.activestate.com/activepython/downloads>`_.
+* Python 3 support. Requires `virtualenv5
+  <http://code.activestate.com/pypm/virtualenv5>`_.
 
 .. __: http://github.com/ActiveState/applib/blob/master/fabfile.py#L1
 
