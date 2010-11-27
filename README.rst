@@ -1,6 +1,13 @@
 fablib
 ======
 
+fablib is a helper library for `Fabric <http://fabfile.org>`_ to setup a
+sandboxed Python environment (virtualenv) for your project without the overhead
+of having to use Buildout.
+
+Installation
+------------
+
 1. Setup::
 
     $ cd /to/my/project
@@ -28,6 +35,14 @@ fablib
     $ bin/python
 
 See the `applib`__ project for a real-world example.
+
+Features
+--------
+
+* Create virtualenv and install packages (including dependencies)
+* Automatically include PyWin32 from global site-packages
+* Use `PyPM <http://code.activestate.com/pypm>`_ (instead of pip) if available
+  -- saves a lot of time. Requires ActivePython.
 
 .. __: http://github.com/ActiveState/applib/blob/master/fabfile.py#L1
 
