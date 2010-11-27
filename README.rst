@@ -19,8 +19,8 @@ Features
 * Python 3 support. Requires `virtualenv5
   <http://code.activestate.com/pypm/virtualenv5>`_.
   
-Installation
-------------
+Usage
+-----
 
 1. Setup::
 
