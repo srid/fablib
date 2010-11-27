@@ -4,10 +4,7 @@ fablib
 1. Setup::
 
     $ cd /to/my/project
-    $ cat > .gitmodules
-    [submodule "fablib"]
-	path = fablib
-	url = git://github.com/srid/fablib.git
+    $ git submodule add git://github.com/srid/fablib.git fablib
     $ cat > fabfile.py
     import sys
     from os import path
