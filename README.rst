@@ -6,6 +6,19 @@ fablib is a helper library for `Fabric
 sandboxed Python environment (virtualenv) for your project without the overhead
 of having to use Buildout.
 
+Features
+--------
+
+* Create virtualenv and install packages (including dependencies)
+* Automatically include `PyWin32
+  <http://docs.activestate.com/activepython/2.7/pywin32/PyWin32.HTML>`_ from
+  global site-packages
+* Use `PyPM <http://code.activestate.com/pypm>`_ (instead of pip) if available
+  -- saves a lot of time. Requires `ActivePython
+  <http://www.activestate.com/activepython/downloads>`_.
+* Python 3 support. Requires `virtualenv5
+  <http://code.activestate.com/pypm/virtualenv5>`_.
+  
 Installation
 ------------
 
@@ -38,18 +51,6 @@ Installation
 
 See the `applib`__ project for a real-world example.
 
-Features
---------
-
-* Create virtualenv and install packages (including dependencies)
-* Automatically include `PyWin32
-  <http://docs.activestate.com/activepython/2.7/pywin32/PyWin32.HTML>`_ from
-  global site-packages
-* Use `PyPM <http://code.activestate.com/pypm>`_ (instead of pip) if available
-  -- saves a lot of time. Requires `ActivePython
-  <http://www.activestate.com/activepython/downloads>`_.
-* Python 3 support. Requires `virtualenv5
-  <http://code.activestate.com/pypm/virtualenv5>`_.
 
 .. __: http://github.com/ActiveState/applib/blob/master/fabfile.py#L1
 
