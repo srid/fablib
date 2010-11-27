@@ -1,7 +1,8 @@
 fablib
 ======
 
-fablib is a helper library for `Fabric <http://fabfile.org>`_ to setup a
+fablib is a helper library for `Fabric
+<http://code.activestate.com/pypm/fabric/>`_ to setup a
 sandboxed Python environment (virtualenv) for your project without the overhead
 of having to use Buildout.
 
@@ -24,7 +25,8 @@ Installation
     clean = venv.clean
     init = venv.init
     
-2. Use::
+2. Install `Fabric`_, `virtualenv
+   <http://code.activestate.com/pypm/virtualenv/>`_ and use::
 
     $ fab -l
     $ fab clean
