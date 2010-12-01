@@ -221,6 +221,16 @@ def _workaround_virtualenv_bugs(py, dir):
        
     b) Include PyWin32 in global site-packages
     """
+    if sys.platform == 'win32':
+        with _workaround_virtualenv_bug_pywin32(py, dir):
+            yield
+    else:
+        with _workaround_virtualenv_bug_readline():
+            yield
+    
+
+@contextmanager
+def _workaround_virtualenv_bug_readline():
     # a) Move readline.so out of the way
     if sys.platform != 'win32':
         readline_canditates = [
@@ -244,7 +254,11 @@ def _workaround_virtualenv_bugs(py, dir):
                 print(readlines)
                 for rl in readlines:
                     os.rename(rl + '.oow', rl)
-    else:
+
+
+@contextmanager
+def _workaround_virtualenv_bug_pywin32(py, dir):
+    if sys.platform == 'win32':
         # Include pywin32.pth with absolute filenames
         yield
         get_sp = "import distutils.sysconfig as sc; print(sc.get_python_lib())"
