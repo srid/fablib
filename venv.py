@@ -23,6 +23,7 @@ def clean():
     The idea is to eventually to delete virtualenv-created files to start
     from scratch.
     """
+    from fabric.api import local
     root = path.abspath('.')
     
     # Read ignore patterns
