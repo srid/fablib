@@ -154,11 +154,11 @@ def install(pkg, dir='.', force_upgrade=False):
         # pip exe doesn't exist (python3?); fallback to easy_install.
         py_exe = get_script('python', dir)
         install_cmd = _ez_install_cmd(py_exe, pkg, force_upgrade)
-    local(install_cmd)
+    local(install_cmd, capture=False)
     
 
 def _pypm_install_cmd(pypm, dir, pkg):
-    return '{0} -E {1} install {2}'.format(pypm, dir, pkg)
+    return '{0} --force -E {1} install {2}'.format(pypm, dir, pkg)
     
 
 def _pip_install_cmd(pip_exe, pkg, force_upgrade):
