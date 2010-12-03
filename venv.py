@@ -10,6 +10,20 @@ import subprocess
 from contextlib import contextmanager
 
 
+# Make this module fabric-independent
+try:
+    from fabric.api import local
+except IOError:
+    def local(cmd, capture=True):
+        """A clone of fabric.api.local() using ``subprocess``"""
+        if capture:
+            return subprocess.Popen(
+                cmd, shell=True,
+                stdout=subprocess.PIPE).communicate()[0]
+        else:
+            subprocess.Popen(cmd, shell=True).communicate()[0]
+
+
 WIN = sys.platform == 'win32'
 
 
@@ -23,7 +37,6 @@ def clean():
     The idea is to eventually to delete virtualenv-created files to start
     from scratch.
     """
-    from fabric.api import local
     root = path.abspath('.')
     
     # Read ignore patterns
@@ -73,7 +86,6 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
           
     Return the virtualenv binary path that was used to create the virtualenv
     """
-    from fabric.api import local
     virtualenv = create_virtualenv(pyver, dir, apy)
 
     # find paths to essential binaries in the created virtualenv
@@ -116,13 +128,13 @@ def create_virtualenv(pyver, dir, apy=False):
 
     # must be ActivePython
     if apy:
-        subprocess.check_call('{0} -m activestate'.format(py), shell=True)
+        local('{0} -m activestate'.format(py))
 
     # create virtualenv
     with _workaround_virtualenv_bugs(py, dir):
         venv_cmd = '{0} --no-site-packages {1} -p {2} {3}'.format(
             virtualenv, distribute_option, py, dir)
-        subprocess.check_call(venv_cmd, shell=True)
+        local(venv_cmd)
         
     return virtualenv
     
@@ -143,7 +155,6 @@ def install(pkg, dir='.', force_upgrade=False):
         pip            (on scripts/)
         easy_install   (on scripts/)
     """
-    from fabric.api import local
     pypm_exe = get_pypm_script()
     pip_exe = get_script('pip', dir)
     if pypm_exe is not None:
