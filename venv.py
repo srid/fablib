@@ -213,8 +213,7 @@ def get_system_python(pyver):
     """
     if sys.platform == 'win32':
         # TODO: support non-ActivePython as well
-        # TODO: change to pythonX.Y once newer versions of APy is released
-        python = 'python{pyver[0]}{pyver[2]}.exe'.format(pyver=pyver)
+        python = 'python{pyver[0]}.{pyver[2]}.exe'.format(pyver=pyver)
     elif sys.platform == 'darwin':
         python = '/Library/Frameworks/Python.framework/Versions/{pyver}/bin/python{pyver}'.format(
             pyver=pyver)
@@ -270,14 +269,16 @@ def _workaround_virtualenv_bug_readline():
 
 @contextmanager
 def _workaround_virtualenv_bug_pywin32(py, dir):
+    """It is not a "bug" per se - but a feature!"""
     if sys.platform == 'win32':
         # Include pywin32.pth with absolute filenames
         yield
         get_sp = "import distutils.sysconfig as sc; print(sc.get_python_lib())"
         sp = check_output([py, '-c', get_sp]).strip()
         pthfile = path.join(sp, 'pywin32.pth')
+        venv_sp = path.join(dir, 'Lib', 'site-packages')
         if path.exists(pthfile):
-            target = path.join(dir, 'Lib', 'site-packages', 'pywin32.pth')
+            target = path.join(venv_sp, 'pywin32.pth')
             print('Including global PyWin32 package: %s' % target)
             shutil.copyfile(pthfile, target)
             # Make the path absolute
@@ -290,6 +291,14 @@ def _workaround_virtualenv_bug_pywin32(py, dir):
             with open(target, 'w') as f:
                 f.writelines(new_pth)
             print('Patched pywin32.pth')
+            
+        # But this doesn't make win32com, etc. available in sys.path; we
+        # should copy them.
+        for source in glob(path.join(sp, 'win32*')):
+            target = path.join(venv_sp, path.basename(source))
+            print('cp %s -> %s' % (source, target))
+            shutil.copytree(source, target)
+        
 
 
 # check_output for python2.6
