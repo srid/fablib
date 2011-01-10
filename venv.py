@@ -297,7 +297,10 @@ def _workaround_virtualenv_bug_pywin32(py, dir):
         for source in glob(path.join(sp, 'win32*')):
             target = path.join(venv_sp, path.basename(source))
             print('cp %s -> %s' % (source, target))
-            shutil.copytree(source, target)
+            if path.isfile(source):
+                shutil.copyfile(source, target)
+            else:
+                shutil.copytree(source, target)
         
 
 
