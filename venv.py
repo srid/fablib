@@ -1,3 +1,5 @@
+# Copyright (c) 2010 ActiveState Software Inc. All rights reserved.
+
 """Virtualenv utilities for fabric"""
 
 import os
