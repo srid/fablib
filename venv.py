@@ -15,9 +15,13 @@ from contextlib import contextmanager
 
 # Make this module fabric-independent
 try:
-    from fabric.api import local
+    from fabric.api import local as _local
+    # Holy cow! Fabric errors won't show stdout/stderr
+    # http://stackoverflow.com/questions/1875306
+    def local(cmd, capture=False):
+        return _local(cmd, capture)
 except IOError:
-    def local(cmd, capture=True):
+    def local(cmd, capture=False):
         """A clone of fabric.api.local() using ``subprocess``"""
         if capture:
             return subprocess.Popen(
@@ -168,7 +172,7 @@ def install(pkg, dir='.', force_upgrade=False):
         # pip exe doesn't exist (python3?); fallback to easy_install.
         py_exe = get_script('python', dir)
         install_cmd = _ez_install_cmd(py_exe, pkg, force_upgrade)
-    local(install_cmd, capture=False)
+    local(install_cmd)
 
 
 def tox(config='tox.ini'):
@@ -181,7 +185,7 @@ def tox(config='tox.ini'):
     with _workaround_virtualenv_bug_readline():
         # if _in_path('tox'):
         if False:  # disable; may have outdated tox installed.
-            local('tox -v -c %s' % config, capture=False)
+            local('tox -v -c %s' % config)
         else:
             # http://codespeak.net/tox/example/hudson.html#zero-installation-for-slaves
             url = "https://pytox.googlecode.com/hg/toxbootstrap.py"
