@@ -305,6 +305,8 @@ def _workaround_virtualenv_bug_readline():
                 print(readlines)
                 for rl in readlines:
                     os.rename(rl + '.oow', rl)
+    else:
+        yield
 
 
 @contextmanager
@@ -341,6 +343,8 @@ def _workaround_virtualenv_bug_pywin32(py, dir):
                 shutil.copyfile(source, target)
             else:
                 shutil.copytree(source, target)
+    else:
+        yield
         
 
 
