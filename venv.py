@@ -9,6 +9,7 @@ import sys
 import shutil
 import time
 import subprocess
+import urllib
 from contextlib import contextmanager
 
 
@@ -168,6 +169,25 @@ def install(pkg, dir='.', force_upgrade=False):
         py_exe = get_script('python', dir)
         install_cmd = _ez_install_cmd(py_exe, pkg, force_upgrade)
     local(install_cmd, capture=False)
+
+
+def tox(config='tox.ini'):
+    """Run tox -- test across multiple Python versions
+
+    tox will automatically be downloaded, if needed.
+
+    This method also works around virtualenv bugs
+    """
+    with _workaround_virtualenv_bug_readline():
+        # if _in_path('tox'):
+        if False:  # disable; may have outdated tox installed.
+            local('tox -c %s' % config, capture=False)
+        else:
+            # http://codespeak.net/tox/example/hudson.html#zero-installation-for-slaves
+            url = "https://pytox.googlecode.com/hg/toxbootstrap.py"
+            d = dict(__filqe__='toxbootstrap.py')
+            exec urllib.urlopen(url).read() in d
+            d['cmdline'](['--recreate', '-c', config])
     
 
 def _pypm_install_cmd(pypm, dir, pkg):
@@ -223,6 +243,20 @@ def get_system_python(pyver):
         python = 'python' + pyver
 
     return python
+
+def _in_path(prog):
+    """Return True of `prog` is in PATH"""
+    if sys.platform == 'win32':
+        exts = ('.exe', '.bat', '.cmd')
+        for p in os.environ['PATH'].split(';'):
+            for ext in exts:
+                if P.exists(P.join(p, prog + ext)):
+                    return True
+    else:
+        for p in os.environ['PATH'].split(':'):
+            if P.exists(P.join(p, prog)):
+                return True
+    return False
 
 
 @contextmanager
