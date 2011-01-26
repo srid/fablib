@@ -181,13 +181,13 @@ def tox(config='tox.ini'):
     with _workaround_virtualenv_bug_readline():
         # if _in_path('tox'):
         if False:  # disable; may have outdated tox installed.
-            local('tox -c %s' % config, capture=False)
+            local('tox -v -c %s' % config, capture=False)
         else:
             # http://codespeak.net/tox/example/hudson.html#zero-installation-for-slaves
             url = "https://pytox.googlecode.com/hg/toxbootstrap.py"
             d = dict(__filqe__='toxbootstrap.py')
             exec urllib.urlopen(url).read() in d
-            d['cmdline'](['--recreate', '-c', config])
+            d['cmdline'](['--recreate', '-v', '-c', config])
     
 
 def _pypm_install_cmd(pypm, dir, pkg):
