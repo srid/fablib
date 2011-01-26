@@ -20,7 +20,7 @@ try:
     # http://stackoverflow.com/questions/1875306
     def local(cmd, capture=False):
         return _local(cmd, capture)
-except IOError:
+except ImportError:
     def local(cmd, capture=False):
         """A clone of fabric.api.local() using ``subprocess``"""
         if capture:
