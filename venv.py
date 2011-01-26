@@ -342,6 +342,10 @@ def _workaround_virtualenv_bug_pywin32(py, dir):
             if path.isfile(source):
                 shutil.copyfile(source, target)
             else:
+                # copytree..mkdir will fail if `target` exists; workaround that
+                if path.exists(target):
+                    print('removing stale target: %s' % target)
+                    shutil.rmtree(target)
                 shutil.copytree(source, target)
     else:
         yield
