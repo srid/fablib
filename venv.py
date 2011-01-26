@@ -319,6 +319,8 @@ def _workaround_virtualenv_bug_pywin32(py, dir):
         sp = check_output([py, '-c', get_sp]).strip()
         pthfile = path.join(sp, 'pywin32.pth')
         venv_sp = path.join(dir, 'Lib', 'site-packages')
+        if not path.exists(venv_sp):
+            os.makedirs(venv_sp)
         if path.exists(pthfile):
             target = path.join(venv_sp, 'pywin32.pth')
             print('Including global PyWin32 package: %s' % target)
