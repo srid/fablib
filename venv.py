@@ -175,7 +175,7 @@ def install(pkg, dir='.', force_upgrade=False):
     local(install_cmd)
 
 
-def tox(config='tox.ini'):
+def tox(config='tox.ini', tox_bin=None):
     """Run tox -- test across multiple Python versions
 
     tox will automatically be downloaded, if needed.
@@ -183,10 +183,10 @@ def tox(config='tox.ini'):
     This method also works around virtualenv bugs
     """
     with _workaround_virtualenv_bug_readline():
-        # if _in_path('tox'):
-        if False:  # disable; may have outdated tox installed.
-            local('tox -v -c %s' % config)
+        if tox_bin is not None:
+            local('%s -v -c %s' % (tox_bin, config))
         else:
+            print('no tox bin specified; using toxbootstrap.py (slow)')
             # http://codespeak.net/tox/example/hudson.html#zero-installation-for-slaves
             url = "https://pytox.googlecode.com/hg/toxbootstrap.py"
             d = dict(__filqe__='toxbootstrap.py')
