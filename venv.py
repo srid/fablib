@@ -13,22 +13,15 @@ import urllib
 from contextlib import contextmanager
 
 
-# Make this module fabric-independent
-try:
-    from fabric.api import local as _local
-    # Holy cow! Fabric errors won't show stdout/stderr
-    # http://stackoverflow.com/questions/1875306
-    def local(cmd, capture=False):
-        return _local(cmd, capture)
-except ImportError:
-    def local(cmd, capture=False):
-        """A clone of fabric.api.local() using ``subprocess``"""
-        if capture:
-            return subprocess.Popen(
-                cmd, shell=True,
-                stdout=subprocess.PIPE).communicate()[0]
-        else:
-            subprocess.Popen(cmd, shell=True).communicate()[0]
+# Fabric's local is buggy; so disable it
+def local(cmd, capture=False):
+    """A clone of fabric.api.local(captire=False) using ``subprocess``"""
+    if capture:
+        return subprocess.Popen(
+            cmd, shell=True,
+            stdout=subprocess.PIPE).communicate()[0]
+    else:
+        subprocess.Popen(cmd, shell=True).communicate()[0]
 
 
 WIN = sys.platform == 'win32'
