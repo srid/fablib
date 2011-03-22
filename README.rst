@@ -28,11 +28,11 @@ Usage
     $ git submodule add git://github.com/srid/fablib.git fablib
     $ cat > fabfile.py
     import sys
-    from os import path
+    import os.path as P
     from fabric.api import *
     # Import github.com/srid/fablib
-    sys.path.append(path.abspath(
-        path.join(path.dirname(__file__), 'fablib')))
+    sys.path.append(P.abspath(
+        P.join(P.dirname(__file__), 'fablib')))
     import venv
     
     clean = venv.clean
