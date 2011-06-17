@@ -16,8 +16,7 @@ Features
 * Use `PyPM <http://code.activestate.com/pypm>`_ (instead of pip) if available
   -- saves a lot of time. Requires `ActivePython
   <http://www.activestate.com/activepython/downloads>`_.
-* Python 3 support. Requires `virtualenv5
-  <http://code.activestate.com/pypm/virtualenv5>`_.
+* Supports Python 3.
   
 Usage
 -----

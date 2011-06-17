@@ -70,16 +70,16 @@ def clean():
 def init(pyver='2.7', upgrade=False, dir='.', apy=False):
     """Create a virtualenv and setup entry points
     
-    Poor man's buildout (supports py3k too!). You will need to have virtualenv
-    and virtualenv5 installed before running this command.
+    Poor man's buildout (supports py3k too!). You will need to have
+    virtualenv installed before running this command.
     
       pyver             -- The Python version to use (eg: 2.7)
       upgrade           -- Should we upgrade installed packages?
       dir               -- Where to create the virtualenv (default: current dir)
       apy               -- Must use ActivePython
       
-    TODO: fail with instructive error message when virtualenv/virtualenv5 is
-          not installed (use which.py?)
+    TODO: fail with instructive error message when virtualenv is not
+          installed (use which.py?)
       
     TODO: support installing [extra] requirements as 'setup.py develop' will
           not install them.
@@ -119,12 +119,8 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
 def create_virtualenv(pyver, dir, apy=False):
     """Keep this function independent of fabric"""
     py = get_system_python(pyver)
-    if pyver[0] == '3':
-        virtualenv = 'virtualenv5'
-        distribute_option = ''  # not required
-    else:
-        virtualenv = 'virtualenv'
-        distribute_option = '--distribute'
+    virtualenv = 'virtualenv'
+    distribute_option = '--distribute'
 
     # must be ActivePython
     if apy:
