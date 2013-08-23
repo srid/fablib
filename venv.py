@@ -1,4 +1,4 @@
-# Copyright (c) 2010 ActiveState Software Inc. All rights reserved.
+# Copyright (c) 2013 ActiveState Software Inc. All rights reserved.
 
 """Virtualenv utilities for fabric"""
 
@@ -103,9 +103,9 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
         except KeyboardInterrupt:
             pass
         
-    # upgrade to latest distribute; virtualenv must have installed an outdated
-    # version.
-    install('distribute', dir=dir, force_upgrade=True)
+    # upgrade to latest setuptools; virtualenv must have installed an
+    # outdated version.
+    install('setuptools', dir=dir, force_upgrade=True)
 
     # setup dev environment
     if path.exists('setup.py'):
@@ -120,7 +120,6 @@ def create_virtualenv(pyver, dir, apy=False):
     """Keep this function independent of fabric"""
     py = get_system_python(pyver)
     virtualenv = 'virtualenv'
-    distribute_option = '--distribute'
 
     # must be ActivePython
     if apy:
@@ -128,8 +127,8 @@ def create_virtualenv(pyver, dir, apy=False):
 
     # create virtualenv
     with _workaround_virtualenv_bugs(py, dir):
-        venv_cmd = '{0} --no-site-packages {1} -p {2} {3}'.format(
-            virtualenv, distribute_option, py, dir)
+        venv_cmd = '{0} --no-site-packages -p {1} {2}'.format(
+            virtualenv, py, dir)
         local(venv_cmd)
         
     return virtualenv
