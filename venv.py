@@ -105,7 +105,7 @@ def init(pyver='2.7', upgrade=False, dir='.', apy=False):
         
     # upgrade to latest setuptools; virtualenv must have installed an
     # outdated version.
-    install('setuptools', dir=dir, force_upgrade=True)
+    install('setuptools', dir=dir, force_upgrade=True, skip_pypm=True)
 
     # setup dev environment
     if path.exists('setup.py'):
@@ -140,7 +140,7 @@ def get_script(name, dir='.'):
     return path.join(dir, scripts_dir, name + '.exe' if WIN else name)
     
     
-def install(pkg, dir='.', force_upgrade=False):
+def install(pkg, dir='.', force_upgrade=False, skip_pypm=False):
     """Install the given package into virtualenv
     
     force_upgrade      -- pass -U option to pip/easy_install
@@ -152,7 +152,7 @@ def install(pkg, dir='.', force_upgrade=False):
     """
     pypm_exe = get_pypm_script()
     pip_exe = get_script('pip', dir)
-    if pypm_exe is not None:
+    if pypm_exe is not None and not skip_pypm:
         install_cmd = _pypm_install_cmd(pypm_exe, dir, pkg)
     elif path.exists(pip_exe):
         install_cmd = _pip_install_cmd(pip_exe, pkg, force_upgrade)
@@ -160,6 +160,7 @@ def install(pkg, dir='.', force_upgrade=False):
         # pip exe doesn't exist (python3?); fallback to easy_install.
         py_exe = get_script('python', dir)
         install_cmd = _ez_install_cmd(py_exe, pkg, force_upgrade)
+    print("Installing using: %s" % install_cmd)
     local(install_cmd)
 
 
