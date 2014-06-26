@@ -120,7 +120,8 @@ def create_virtualenv(pyver, dir, apy=False):
     """Keep this function independent of fabric"""
     py = get_system_python(pyver)
     virtualenv = 'virtualenv'
-
+    
+    print('Using Python: %s' % py)
     # must be ActivePython
     if apy:
         local('{0} -m activestate'.format(py))
@@ -234,6 +235,10 @@ def get_system_python(pyver):
             pyver=pyver)
     else:
         python = 'python' + pyver
+        # Auto-detect typical APy install path on Unix
+        optpy = "/opt/ActivePython-%s" % pyver
+        if path.exists(optpy):
+            python = "%s/bin/%s" % (optpy, python)
 
     return python
 
